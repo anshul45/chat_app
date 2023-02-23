@@ -25,7 +25,7 @@ const Register = () => {
         (error) => {
           setErr(true);
         },
-        () => {
+        await uploadBytesResumable(storageRef, file).then( () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
             await updateProfile(res.user, {
               displayName,
@@ -37,9 +37,10 @@ const Register = () => {
               email,
               photoURL: downloadURL,
             });
+            await setDoc(doc(db,"userChats",res.user.uid),{})
           });
         }
-      );
+      )
     } catch (err) {
       setErr(true);
     }
