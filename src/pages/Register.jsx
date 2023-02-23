@@ -1,9 +1,10 @@
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, storage } from "../firebase";
+import { auth, storage, db } from "../firebase";
 import React, { useState } from "react";
 import Add from "../img/addAvatar.png";
-
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { doc, setDoc } from "firebase/firestore";
+
 const Register = () => {
   const [err, setErr] = useState(false);
   const handleSubmit = async (e) => {
@@ -28,6 +29,12 @@ const Register = () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
             await updateProfile(res.user, {
               displayName,
+              photoURL: downloadURL,
+            });
+            await setDoc(doc(db, "users", res.user.uid), {
+              uid: res.user.uid,
+              displayName,
+              email,
               photoURL: downloadURL,
             });
           });
