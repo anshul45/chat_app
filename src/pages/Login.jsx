@@ -13,7 +13,7 @@ const Login = () => {
 
     try {
       signInWithEmailAndPassword(auth, email, password);
-      navigate("/login");
+      navigate("/");
     } catch (err) {
       console.log(err);
       setErr(true);
