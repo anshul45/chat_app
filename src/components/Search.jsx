@@ -36,11 +36,20 @@ const Search = () => {
     try {
       const res = await getDocs(db, "chats", combineId);
       if (!res.exist()) {
+        //create a chat in chats collection
         await setDoc(doc, (db, "chats", combineId), { messages: [] });
+
+        //create user chats
+        userChats: {
+          janesId: {
+            combineId;
+          }
+        }
       }
     } catch (err) {
       setErr(true);
     }
+    //create user chats
   };
   return (
     <div className="search">
