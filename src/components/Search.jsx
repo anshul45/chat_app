@@ -1,5 +1,14 @@
 import React, { useContext, useState } from "react";
-import { collection, query, where, getDocs, setDoc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  setDoc,
+  updateDoc,
+  doc,
+  serverTimestamp,
+  getDoc,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import { AuthContext } from "../context/AuthContext";
 
@@ -23,28 +32,42 @@ const Search = () => {
     } catch (err) {
       setErr(true);
     }
+    setUser(null);
+    setUsername("");
   };
 
   const handleKey = (e) => {
     e.code === "Enter" && handleSearch();
   };
   const handleSelect = async () => {
-    const combineId =
+    const combinedId =
       currentUser.uid > user.uid
         ? currentUser.uid + user.uid
         : user.uid + currentUser.uid;
     try {
-      const res = await getDocs(db, "chats", combineId);
+      const res = await getDoc(doc(db, "chats", combinedId));
       if (!res.exist()) {
         //create a chat in chats collection
-        await setDoc(doc, (db, "chats", combineId), { messages: [] });
+        await setDoc(doc(db, "chats", combinedId), { messages: [] });
 
         //create user chats
-        userChats: {
-          janesId: {
-            combineId;
-          }
-        }
+        await updateDoc(doc(db, "userChats", currentUser.uid), {
+          [combinedId + ".userInfo"]: {
+            uid: user.uid,
+            displayName: user.displayName,
+            photoUrl: user.photoUrl,
+          },
+          [combinedId + ".date"]: serverTimestamp(),
+        });
+
+        await updateDoc(doc(db, "userChats", user.uid), {
+          [combinedId + ".userInfo"]: {
+            uid: currentUser.uid,
+            displayName: currentUser.displayName,
+            photoUrl: currentUser.photoUrl,
+          },
+          [combinedId + ".date"]: serverTimestamp(),
+        });
       }
     } catch (err) {
       setErr(true);
@@ -59,6 +82,7 @@ const Search = () => {
           placeholder="Find a user"
           onKeyDown={handleKey}
           onChange={(e) => setUsername(e.target.value)}
+          value={username}
         />
       </div>
       {err && <span>User not found!</span>}
